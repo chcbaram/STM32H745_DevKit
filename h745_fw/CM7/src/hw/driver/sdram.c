@@ -559,7 +559,7 @@ void cliSdram(cli_args_t *args)
         {
           data_sum += p_data[i];
         }
-        cliPrintf( "Read : %d MB/s\n", SDRAM_DEVICE_SIZE / 1000 / (millis()-pre_time) );
+        cliPrintf( "Read  : %d MB/s\n", SDRAM_DEVICE_SIZE / 1000 / (millis()-pre_time) );
 
 
         for (i=0; i<SDRAM_DEVICE_SIZE/4; i++)

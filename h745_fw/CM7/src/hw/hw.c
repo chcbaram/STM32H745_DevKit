@@ -54,6 +54,7 @@ void hwInit(void)
   logPrintf("Booting..Board\t\t: %s\r\n", fw_tag.board_str);
   logPrintf("Booting..Name \t\t: %s\r\n", fw_tag.name_str);
   logPrintf("Booting..Ver  \t\t: %s\r\n", fw_tag.version_str);
+  logPrintf("Booting..Clock\t\t: %d Mhz\r\n", (int)HAL_RCC_GetSysClockFreq()/1000000);
 
 
   sdramInit();

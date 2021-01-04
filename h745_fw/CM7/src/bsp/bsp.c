@@ -222,7 +222,7 @@ void mpuInit(void)
   MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
 
-
+#if 0
   /* Write-back, write and read allocate */
   MPU_InitStruct.Enable           = MPU_REGION_ENABLE;
   MPU_InitStruct.BaseAddress      = 0xD0000000;
@@ -236,7 +236,7 @@ void mpuInit(void)
   MPU_InitStruct.SubRegionDisable = 0x00;
   MPU_InitStruct.DisableExec      = MPU_INSTRUCTION_ACCESS_ENABLE;
   HAL_MPU_ConfigRegion(&MPU_InitStruct);
-
+#endif
 
   /* Enable the MPU */
   HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
