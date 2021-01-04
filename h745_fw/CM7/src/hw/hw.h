@@ -19,10 +19,10 @@ extern "C" {
 #include "uart.h"
 #include "button.h"
 #include "swtimer.h"
-#include "cmdif.h"
 #include "sdram.h"
 #include "flash.h"
 #include "qspi.h"
+#include "cli.h"
 
 void hwInit(void);
 

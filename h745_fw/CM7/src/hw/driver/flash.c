@@ -10,7 +10,7 @@
 
 #include "flash.h"
 #include "qspi.h"
-#include "cmdif.h"
+#include "cli.h"
 
 
 #define FLASH_MAX_SECTOR          8
@@ -50,9 +50,8 @@ const flash_tbl_t flash_tbl_bank2[FLASH_MAX_SECTOR] =
     };
 
 
-#ifdef _USE_HW_FLASH
-void flashCmdifInit(void);
-void flashCmdif(void);
+#ifdef _USE_HW_CLI
+void cliFlash(cli_args_t *args);
 #endif
 
 
@@ -61,8 +60,8 @@ void flashCmdif(void);
 bool flashInit(void)
 {
 
-#ifdef _USE_HW_FLASH
-  flashCmdifInit();
+#ifdef _USE_HW_CLI
+  cliAdd("flash", cliFlash);
 #endif
 
   return true;
@@ -275,13 +274,8 @@ bool flashRead(uint32_t addr, uint8_t *p_data, uint32_t length)
 
 
 
-#ifdef _USE_HW_FLASH
-void flashCmdifInit(void)
-{
-  cmdifAdd("flash", flashCmdif);
-}
-
-void flashCmdif(void)
+#ifdef _USE_HW_CLI
+void cliFlash(cli_args_t *args)
 {
   bool ret = true;
   uint32_t i;
@@ -292,24 +286,17 @@ void flashCmdif(void)
   bool flash_ret;
 
 
-  if (cmdifGetParamCnt() == 1)
+  if (args->argc == 1 && args->isStr(0, "info") == true)
   {
-    if(cmdifHasString("info", 0) == true)
-    {
-      cmdifPrintf("flash addr  : 0x%X\n", 0x08000000);
-      cmdifPrintf("qspi  addr  : 0x%X\n", 0x90000000);
-    }
-    else
-    {
-      ret = false;
-    }
+    cliPrintf("flash addr  : 0x%X\n", 0x08000000);
+    cliPrintf("qspi  addr  : 0x%X\n", 0x90000000);
   }
-  else if (cmdifGetParamCnt() == 3)
+  else if (args->argc == 3)
   {
-    if(cmdifHasString("read", 0) == true)
+    if(args->isStr(0, "read") == true)
     {
-      addr   = (uint32_t)cmdifGetParam(1);
-      length = (uint32_t)cmdifGetParam(2);
+      addr   = (uint32_t)args->getData(1);
+      length = (uint32_t)args->getData(2);
 
       for (i=0; i<length; i++)
       {
@@ -317,48 +304,48 @@ void flashCmdif(void)
 
         if (flash_ret == true)
         {
-          cmdifPrintf( "addr : 0x%X\t 0x%02X\n", addr+i, data);
+          cliPrintf( "addr : 0x%X\t 0x%02X\n", addr+i, data);
         }
         else
         {
-          cmdifPrintf( "addr : 0x%X\t Fail\n", addr+i);
+          cliPrintf( "addr : 0x%X\t Fail\n", addr+i);
         }
       }
     }
-    else if(cmdifHasString("erase", 0) == true)
+    else if(args->isStr(0, "erase") == true)
     {
-      addr   = (uint32_t)cmdifGetParam(1);
-      length = (uint32_t)cmdifGetParam(2);
+      addr   = (uint32_t)args->getData(1);
+      length = (uint32_t)args->getData(2);
 
       pre_time = micros();
       flash_ret = flashErase(addr, length);
 
-      cmdifPrintf( "addr : 0x%X\t len : %d %d ms\n", addr, length, (micros()-pre_time)/1000);
+      cliPrintf( "addr : 0x%X\t len : %d %d ms\n", addr, length, (micros()-pre_time)/1000);
       if (flash_ret)
       {
-        cmdifPrintf("OK\n");
+        cliPrintf("OK\n");
       }
       else
       {
-        cmdifPrintf("FAIL\n");
+        cliPrintf("FAIL\n");
       }
     }
-    else if(cmdifHasString("write", 0) == true)
+    else if(args->isStr(0, "write") == true)
     {
-      addr = (uint32_t)cmdifGetParam(1);
-      data = (uint8_t )cmdifGetParam(2);
+      addr = (uint32_t)args->getData(1);
+      data = (uint8_t )args->getData(2);
 
       pre_time = micros();
       flash_ret = flashWrite(addr, &data, 1);
 
-      cmdifPrintf( "addr : 0x%X\t 0x%02X %dus\n", addr, data, micros()-pre_time);
+      cliPrintf( "addr : 0x%X\t 0x%02X %dus\n", addr, data, micros()-pre_time);
       if (flash_ret)
       {
-        cmdifPrintf("OK\n");
+        cliPrintf("OK\n");
       }
       else
       {
-        cmdifPrintf("FAIL\n");
+        cliPrintf("FAIL\n");
       }
     }
     else
@@ -374,10 +361,10 @@ void flashCmdif(void)
 
   if (ret == false)
   {
-    cmdifPrintf( "flash info\n");
-    cmdifPrintf( "flash read  [addr] [length]\n");
-    cmdifPrintf( "flash erase [addr] [length]\n");
-    cmdifPrintf( "flash write [addr] [data]\n");
+    cliPrintf( "flash info\n");
+    cliPrintf( "flash read  [addr] [length]\n");
+    cliPrintf( "flash erase [addr] [length]\n");
+    cliPrintf( "flash write [addr] [data]\n");
   }
 
 }

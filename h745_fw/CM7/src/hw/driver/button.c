@@ -10,7 +10,7 @@
 
 #include "button.h"
 #include "swtimer.h"
-#include "cmdif.h"
+#include "cli.h"
 
 
 typedef struct
@@ -56,9 +56,8 @@ typedef struct
 static button_t button_tbl[BUTTON_MAX_CH];
 
 
-#ifdef _USE_HW_CMDIF
-void buttonCmdifInit(void);
-void buttonCmdif(void);
+#ifdef _USE_HW_CLI
+void cliButton(cli_args_t *args);
 #endif
 
 static bool is_enable = true;
@@ -170,8 +169,8 @@ bool buttonInit(void)
   swtimerSet(h_button_timer, 1, LOOP_TIME, button_isr, NULL );
   swtimerStart(h_button_timer);
 
-#ifdef _USE_HW_CMDIF
-  buttonCmdifInit();
+#ifdef _USE_HW_CLI
+  cliAdd("button", cliButton);
 #endif
 
 
@@ -363,30 +362,25 @@ uint32_t buttonGetReleasedTime(uint8_t ch)
 
 
 
-#ifdef _USE_HW_CMDIF
-void buttonCmdifInit(void)
-{
-  cmdifAdd("button", buttonCmdif);
-}
-
-void buttonCmdif(void)
+#ifdef _USE_HW_CLI
+void cliButton(cli_args_t *args)
 {
   bool ret = true;
   uint8_t ch;
   uint32_t i;
 
 
-  if (cmdifGetParamCnt() == 1)
+  if (args->argc == 1)
   {
-    if(cmdifHasString("show", 0) == true)
+    if(args->isStr(0, "show") == true)
     {
-      while(cmdifRxAvailable() == 0)
+      while(cliKeepLoop())
       {
         for (i=0; i<BUTTON_MAX_CH; i++)
         {
-          cmdifPrintf("%d", buttonGetPressed(i));
+          cliPrintf("%d", buttonGetPressed(i));
         }
-        cmdifPrintf("\r");
+        cliPrintf("\r");
         delay(50);
       }
     }
@@ -395,22 +389,22 @@ void buttonCmdif(void)
       ret = false;
     }
   }
-  else if (cmdifGetParamCnt() == 2)
+  else if (args->argc == 2)
   {
-    ch = (uint8_t)cmdifGetParam(1);
+    ch = (uint8_t)args->getData(1);
 
     if (ch > 0)
     {
       ch--;
     }
 
-    if (cmdifHasString("time", 0) == true)
+    if (args->isStr(0, "time") == true)
     {
-      while(cmdifRxAvailable() == 0)
+      while(cliKeepLoop())
       {
         if(buttonGetPressed(ch))
         {
-          cmdifPrintf("BUTTON%d, Time :  %d ms\n", ch+1, buttonGetPressedTime(ch));
+          cliPrintf("BUTTON%d, Time :  %d ms\n", ch+1, buttonGetPressedTime(ch));
         }
       }
     }
@@ -427,7 +421,7 @@ void buttonCmdif(void)
 
   if (ret == false)
   {
-    cmdifPrintf( "button [show/time] channel(1~%d) ...\n", BUTTON_MAX_CH);
+    cliPrintf( "button [show/time] channel(1~%d) ...\n", BUTTON_MAX_CH);
   }
 }
 #endif

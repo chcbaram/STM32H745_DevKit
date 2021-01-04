@@ -15,8 +15,8 @@
 
 typedef struct
 {
-  GPIO_TypeDef* GPIOx;
-  uint16_t      GPIO_Pin;
+  GPIO_TypeDef *port;
+  uint16_t      pin;
   GPIO_PinState on_state;
   GPIO_PinState off_state;
 } led_tbl_t;
@@ -24,47 +24,55 @@ typedef struct
 
 led_tbl_t led_tbl[LED_MAX_CH] =
     {
-        {GPIOI, GPIO_PIN_13, GPIO_PIN_RESET, GPIO_PIN_SET},
+        {GPIOC, GPIO_PIN_13, GPIO_PIN_RESET, GPIO_PIN_SET},
     };
 
 
 
 
 
-void ledInit(void)
+bool ledInit(void)
 {
-  uint32_t i;
+  bool ret = true;
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
 
 
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
 
-
-  for (i=0; i<LED_MAX_CH; i++)
+  for (int i=0; i<LED_MAX_CH; i++)
   {
+    GPIO_InitStruct.Pin = led_tbl[i].pin;
+    HAL_GPIO_Init(led_tbl[i].port, &GPIO_InitStruct);
+
     ledOff(i);
   }
+
+  return ret;
 }
 
 void ledOn(uint8_t ch)
 {
-  HAL_GPIO_WritePin(led_tbl[ch].GPIOx, led_tbl[ch].GPIO_Pin, led_tbl[ch].on_state);
+  if (ch >= LED_MAX_CH) return;
+
+  HAL_GPIO_WritePin(led_tbl[ch].port, led_tbl[ch].pin, led_tbl[ch].on_state);
 }
 
 void ledOff(uint8_t ch)
 {
-  HAL_GPIO_WritePin(led_tbl[ch].GPIOx, led_tbl[ch].GPIO_Pin, led_tbl[ch].off_state);
+  if (ch >= LED_MAX_CH) return;
+
+  HAL_GPIO_WritePin(led_tbl[ch].port, led_tbl[ch].pin, led_tbl[ch].off_state);
 }
 
 void ledToggle(uint8_t ch)
 {
-  HAL_GPIO_TogglePin(led_tbl[ch].GPIOx, led_tbl[ch].GPIO_Pin);
+  if (ch >= LED_MAX_CH) return;
+
+  HAL_GPIO_TogglePin(led_tbl[ch].port, led_tbl[ch].pin);
 }
 
 #endif

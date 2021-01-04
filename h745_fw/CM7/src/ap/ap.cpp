@@ -16,7 +16,7 @@
 
 void apInit(void)
 {
-  cmdifOpen(_DEF_UART1, 57600);
+  cliOpen(_DEF_UART1, 57600);
 }
 
 void apMain(void)
@@ -27,7 +27,7 @@ void apMain(void)
   pre_time = millis();
   while(1)
   {
-    cmdifMain();
+    cliMain();
 
     if (millis()-pre_time >= 500)
     {

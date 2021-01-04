@@ -9,7 +9,7 @@
 
 
 #include "sdram.h"
-#include "cmdif.h"
+#include "cli.h"
 
 
 
@@ -42,9 +42,8 @@ void    BSP_SDRAM_MspDeInit(SDRAM_HandleTypeDef  *hsdram, void *Params);
 static bool is_init = false;
 
 
-#ifdef _USE_HW_CMDIF
-void sdramCmdifInit(void);
-void sdramCmdif(void);
+#ifdef _USE_HW_CLI
+void cliSdram(cli_args_t *args);
 #endif
 
 
@@ -67,8 +66,8 @@ bool sdramInit(void)
     logPrintf("SDRAM  \t\t: Fail\r\n");
   }
 
-#ifdef _USE_HW_CMDIF
-  sdramCmdifInit();
+#ifdef _USE_HW_CLI
+  cliAdd("sdram", cliSdram);
 #endif
 
   is_init = ret;
@@ -527,13 +526,8 @@ __weak void BSP_SDRAM_MspDeInit(SDRAM_HandleTypeDef  *hsdram, void *Params)
 
 
 
-#ifdef _USE_HW_CMDIF
-void sdramCmdifInit(void)
-{
-  cmdifAdd("sdram", sdramCmdif);
-}
-
-void sdramCmdif(void)
+#ifdef _USE_HW_CLI
+void cliSdram(cli_args_t *args)
 {
   bool ret = true;
   uint8_t number;
@@ -541,13 +535,13 @@ void sdramCmdif(void)
   uint32_t pre_time;
 
 
-  if (cmdifGetParamCnt() == 2)
+  if (args->argc == 2)
   {
-    if(cmdifHasString("test", 0) == true)
+    if(args->isStr(0, "test") == true)
     {
       uint32_t *p_data = (uint32_t *)SDRAM_DEVICE_ADDR;
 
-      number = (uint8_t)cmdifGetParam(1);
+      number = (uint8_t)args->getData(1);
 
       while(number > 0)
       {
@@ -556,22 +550,31 @@ void sdramCmdif(void)
         {
           p_data[i] = i;
         }
-        cmdifPrintf( "Write : %d MB/s\n", SDRAM_DEVICE_SIZE / (millis()-pre_time) / 1000 );
+        cliPrintf( "Write : %d MB/s\n", SDRAM_DEVICE_SIZE / (millis()-pre_time) / 1000 );
+
+
+        volatile uint32_t data_sum = 0;
+        pre_time = millis();
+        for (i=0; i<SDRAM_DEVICE_SIZE/4; i++)
+        {
+          data_sum += p_data[i];
+        }
+        cliPrintf( "Read : %d MB/s\n", SDRAM_DEVICE_SIZE / 1000 / (millis()-pre_time) );
 
 
         for (i=0; i<SDRAM_DEVICE_SIZE/4; i++)
         {
           if (p_data[i] != i)
           {
-            cmdifPrintf( "%d : 0x%X fail\n", i, p_data[i]);
+            cliPrintf( "%d : 0x%X fail\n", i, p_data[i]);
             break;
           }
         }
 
         if (i == SDRAM_DEVICE_SIZE/4)
         {
-          cmdifPrintf( "Count %d\n", number);
-          cmdifPrintf( "Sdram %d MB OK\n\n", SDRAM_DEVICE_SIZE/1024/1024);
+          cliPrintf( "Count %d\n", number);
+          cliPrintf( "Sdram %d MB OK\n\n", SDRAM_DEVICE_SIZE/1024/1024);
           for (i=0; i<SDRAM_DEVICE_SIZE/4; i++)
           {
             p_data[i] = 0x5555AAAA;
@@ -580,9 +583,9 @@ void sdramCmdif(void)
 
         number--;
 
-        if (cmdifRxAvailable() > 0)
+        if (cliAvailable() > 0)
         {
-          cmdifPrintf( "Stop test...\n");
+          cliPrintf( "Stop test...\n");
           break;
         }
       }
@@ -600,7 +603,7 @@ void sdramCmdif(void)
 
   if (ret == false)
   {
-    cmdifPrintf( "sdram test 1~100 \n");
+    cliPrintf( "sdram test 1~100 \n");
   }
 }
 #endif

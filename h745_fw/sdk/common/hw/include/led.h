@@ -20,7 +20,7 @@ extern "C" {
 #define LED_MAX_CH    HW_LED_MAX_CH
 
 
-void ledInit(void);
+bool ledInit(void);
 void ledOn(uint8_t ch);
 void ledOff(uint8_t ch);
 void ledToggle(uint8_t ch);
