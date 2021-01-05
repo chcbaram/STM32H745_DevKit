@@ -203,7 +203,7 @@ bool flashWrite(uint32_t addr, uint8_t *p_data, uint32_t length)
       return false;
     }
 
-    if (length < 32)
+    if (offset == 0 && length < 32)
     {
       index += length;
     }
