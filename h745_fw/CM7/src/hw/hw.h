@@ -23,6 +23,8 @@ extern "C" {
 #include "flash.h"
 #include "qspi.h"
 #include "cli.h"
+#include "usb.h"
+
 
 void hwInit(void);
 

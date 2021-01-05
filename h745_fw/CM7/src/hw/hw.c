@@ -47,6 +47,7 @@ void hwInit(void)
 
   ledInit();
   buttonInit();
+  usbInit();
   uartInit();
   uartOpen(_DEF_UART1, 57600);
 
@@ -61,4 +62,5 @@ void hwInit(void)
   qspiInit();
   flashInit();
 
+  usbBegin(USB_CDC_MODE);
 }

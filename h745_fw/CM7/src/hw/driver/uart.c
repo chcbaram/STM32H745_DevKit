@@ -10,18 +10,19 @@
 
 #include "uart.h"
 #include "qbuffer.h"
-//#include "vcp.h"
-
+#ifdef _USE_HW_CDC
+#include "cdc.h"
+#endif
 
 
 
 #define UART_MODE_POLLING       0
 #define UART_MODE_INTERRUPT     1
 #define UART_MODE_DMA           2
-#define UART_MODE_VCP           3
+#define UART_MODE_CDC           3
 
 #define UART_HW_NONE            0
-#define UART_HW_STM32_VCP       1
+#define UART_HW_STM32_CDC       1
 #define UART_HW_STM32_UART      2
 
 
@@ -135,9 +136,9 @@ bool uartOpen(uint8_t channel, uint32_t baud)
       p_uart->baud     = baud;
       p_uart->is_open  = true;
 
-      p_uart->rx_mode  = UART_MODE_VCP;
-      p_uart->tx_mode  = UART_MODE_VCP;
-      p_uart->hw_driver = UART_HW_STM32_VCP;
+      p_uart->rx_mode  = UART_MODE_CDC;
+      p_uart->tx_mode  = UART_MODE_CDC;
+      p_uart->hw_driver = UART_HW_STM32_CDC;
       uartStartRx(channel);
       ret = true;
       break;
@@ -203,10 +204,10 @@ uint32_t uartAvailable(uint8_t channel)
   {
     return 0;
   }
-#ifdef _USE_HW_VCP
-  if (p_uart->rx_mode == UART_MODE_VCP)
+#ifdef _USE_HW_CDC
+  if (p_uart->rx_mode == UART_MODE_CDC)
   {
-    ret = vcpAvailable();
+    ret = cdcAvailable();
   }
 #endif
   if (p_uart->rx_mode == UART_MODE_INTERRUPT)
@@ -224,10 +225,10 @@ uint32_t uartAvailable(uint8_t channel)
 
 void uartFlush(uint8_t channel)
 {
-#ifdef _USE_HW_VCP
-  if (uart_tbl[channel].rx_mode == UART_MODE_VCP)
+#ifdef _USE_HW_CDC
+  if (uart_tbl[channel].rx_mode == UART_MODE_CDC)
   {
-    vcpFlush();
+    cdcFlush();
   }
 #endif
 
@@ -270,10 +271,10 @@ int32_t uartWrite(uint8_t channel, uint8_t *p_data, uint32_t length)
   uart_t *p_uart = &uart_tbl[channel];
 
 
-#ifdef _USE_HW_VCP
-  if (p_uart->tx_mode == UART_MODE_VCP)
+#ifdef _USE_HW_CDC
+  if (p_uart->tx_mode == UART_MODE_CDC)
   {
-    vcpWrite(p_data, length);
+    cdcWrite(p_data, length);
   }
 #endif
   if (p_uart->tx_mode == UART_MODE_POLLING)
@@ -299,10 +300,10 @@ uint8_t uartRead(uint8_t channel)
   uart_t *p_uart = &uart_tbl[channel];
 
 
-#ifdef _USE_HW_VCP
-  if (p_uart->rx_mode == UART_MODE_VCP)
+#ifdef _USE_HW_CDC
+  if (p_uart->rx_mode == UART_MODE_CDC)
   {
-    ret = vcpRead();
+    ret = cdcRead();
   }
 #endif
   if (p_uart->rx_mode == UART_MODE_INTERRUPT)

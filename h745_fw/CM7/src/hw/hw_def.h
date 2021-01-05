@@ -23,13 +23,18 @@
 #define      HW_LED_MAX_CH          1
 
 #define _USE_HW_UART
-#define      HW_UART_MAX_CH         1
+#define      HW_UART_MAX_CH         2
 
 #define _USE_HW_BUTTON
 #define      HW_BUTTON_MAX_CH       1
 
 #define _USE_HW_SWTIMER
 #define      HW_SWTIMER_MAX_CH      8
+
+#define _USE_HW_CDC
+#define _USE_HW_USB
+#define      HW_USE_CDC             1
+#define      HW_USE_MSC             0
 
 #define _USE_HW_CLI
 #define      HW_CLI_CMD_LIST_MAX    32

@@ -17,6 +17,7 @@
 void apInit(void)
 {
   cliOpen(_DEF_UART1, 57600);
+  uartOpen(_DEF_UART2, 57600);
 }
 
 void apMain(void)
@@ -33,6 +34,11 @@ void apMain(void)
     {
       pre_time = millis();
       ledToggle(_DEF_LED1);
+    }
+
+    if (uartAvailable(_DEF_UART2) > 0)
+    {
+      uartPrintf(_DEF_UART2, "USB Rx : 0x%X\n", uartRead(_DEF_UART2));
     }
   }
 }
