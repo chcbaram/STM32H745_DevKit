@@ -41,7 +41,7 @@ PHDRS {Loader PT_LOAD; SgInfo PT_LOAD ; }
 /* Specify the memory areas */
 MEMORY
 {
-  RAM (xrw)       : ORIGIN = 0x24000008, LENGTH = 512K
+  RAM (xrw)       : ORIGIN = 0x24000004, LENGTH = 512K
 }
 
 /* Define output sections */
